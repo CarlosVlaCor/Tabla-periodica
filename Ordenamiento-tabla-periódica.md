@@ -9,9 +9,7 @@ IF decision == 1
 	PRINT 'Elige la forma en la que se ordenan'
 	PRINT '1. Por número atómico
 		2. Masa atómica
-		3. Por orden alfabético
-		4. Por periodo
-		5. Por grupo'
+		3. Por orden alfabético'
 	INPUT decisionOrden
 	PRINT 'Elige la manera de ordenarlos'
 	PRINT '1.Manera ascendente
@@ -22,8 +20,6 @@ IF decision == 1
 		1 : ordenNumAtomico(maneraOrden)
 		2 : masaAtomica(maneraOrden)
 		3 : ordenAlfabetico(maneraOrden)
-		4 : ordenPeriodo(maneraOrden)
-		5 : ordenGrupo(maneraOrden)
 		DEFAULT : PRINT 'Valor invalido'
 	ELSE IF maneraOrden == 2
 		CASE decisionOrden
@@ -76,7 +72,7 @@ FUNCTION ordenNumAtomico(maneraOrden)
 					elementos[i] = menor
 					elementos[j] = mayor
 
-
+					
 	ELSE
 		FOR i = 0, i < LENGHT elementos[], incrementar i
 			j = i + 1
