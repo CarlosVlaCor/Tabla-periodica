@@ -7,12 +7,12 @@ PRINT '1. Por los elementos de cada elemento.
 INPUT decision
 IF decision == 1
 	PRINT 'Elige la forma en la que se ordenan'
-	PRINT '1. Por número atómico
+	PRINT ' 1. Por número atómico
 		2. Masa atómica
 		3. Por orden alfabético'
 	INPUT decisionOrden
 	PRINT 'Elige la manera de ordenarlos'
-	PRINT '1.Manera ascendente
+	PRINT ' 1.Manera ascendente
 		2.Manera descendente'
 	INPUT maneraOrden
 	IF maneraOrden == 1
@@ -34,7 +34,6 @@ IF decision == 1
 	
 	ENDCASE
 ELSE IF decision == 2
-	orden[]
 	PRINT 'Seleccione el orden de los tipos
 		1.Gases nobles
 		2.Halogenos
