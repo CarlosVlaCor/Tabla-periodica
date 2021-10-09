@@ -1,6 +1,6 @@
 START
 elementos[]
-
+FUNCTION ordenamiento()
 PRINT 'Elige la forma en la que quieres ordenar'
 PRINT '1. Por los elementos de cada elemento.
        2. Por los tipos de elementos'
@@ -36,16 +36,16 @@ IF decision == 1
 ELSE IF decision == 2
 	orden[]
 	PRINT 'Seleccione el orden de los tipos
-		Gases nobles
-		Halogenos
-		No Metales
-	       Metaloides
-	       Metales de transición
-	       Alcalinotérreos
-	       Metales Alcalinos
-	       Lantánidos.
-	       Actínidos	
-	       Otros metales'
+		1.Gases nobles
+		2.Halogenos
+		3.No Metales
+	       4.Metaloides
+	       5.Metales de transición
+	       6.Alcalinotérreos
+	       7.Metales Alcalinos
+	       8.Lantánidos.
+	       9.Actínidos	
+	       10.Otros metales'
 	i = 1
 	WHILE i <= 10
 		PRINT 'Escriba el tipo que irá en la posición' i
@@ -56,7 +56,9 @@ ELSE IF decision == 2
 ELSE
 	PRINT 'No existe una decisión fuera de 1 y 2'
 
+END OF FUNCTION
 END
+
 
 FUNCTION ordenNumAtomico(maneraOrden)
 	
