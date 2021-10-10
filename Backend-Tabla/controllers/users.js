@@ -25,7 +25,7 @@ exports.getUsers = async (req,res) =>{
         
         const usern = []
         for (let i = 0; i < find.length; i++) {
-            ass[i] ={
+            usern[i] ={
                 username: find[i].username,
             };
             
