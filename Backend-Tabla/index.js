@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const db = require('./models/index');
 const router = require('./routes/routes');
+const fileUpload = require('express-fileupload');
 const app = express();
 
 db.sequelize.sync();
@@ -17,7 +18,7 @@ app.get('/', (req,res)=>{
 });
 
 app.use('/api',router);
-
+app.use('/public',express.static(__dirname + '/public'));
 app.listen(3000,()=>{
     console.log("Servidor corriendo");
 });

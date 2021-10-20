@@ -26,6 +26,7 @@ exports.login = async (req,res) =>{
         let token = jwt.sign({
             user: response,
         },
+        
         privateKey,
         expireIn);
 

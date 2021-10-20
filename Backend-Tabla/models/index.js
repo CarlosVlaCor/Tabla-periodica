@@ -13,8 +13,14 @@ db.sequelize = sequelize;
 db.user = require('./user')(sequelize,Sequelize);
 db.elementType = require('./elementType')(sequelize,Sequelize);
 db.element = require('./element')(sequelize,Sequelize);
+db.userElement = require('./userElement')(sequelize,Sequelize);
 
 db.elementType.hasMany(db.element);
 db.element.belongsTo(db.elementType);
+db.user.hasMany(db.userElement);
+db.userElement.belongsTo(db.user);
+db.element.hasMany(db.userElement);
+db.userElement.belongsTo(db.element);
+
 
 module.exports = db;

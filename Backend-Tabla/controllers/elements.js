@@ -1,6 +1,8 @@
+
 const db = require('../models/index');
 const element = db.element;
 const uploadImages= require('../utils/uploadImages');
+const elementType = db.elementType;
 exports.createElement = async (req,res) =>{
     try {
         const {body} = req;
@@ -25,9 +27,22 @@ exports.createElement = async (req,res) =>{
             elementTypeId: body.elementTypeId,
             image: imagen,
         });
-        console.log("AAAAAA");
+        
         return res.status(200).send({message: "Creado"});
     } catch (error) {
         return res.status(500).send(message.error);
+    }
+}
+exports.getElement = async (req,res) =>{
+    try {
+        const {name }= req.query;
+        const find = await element.findOne({
+            where:{name:name},
+            include:{model:elementType}
+        });
+        console.log(name);
+        return res.status(200).send(find);
+    } catch (error) {
+        
     }
 }

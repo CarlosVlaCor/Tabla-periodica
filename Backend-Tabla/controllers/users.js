@@ -1,6 +1,9 @@
 const db = require('../models/index');
 const user = db.user;
+const element = db.element;
 const bcrypt = require('bcryptjs');
+const userElement = db.userElement;
+
 exports.createUser = async (req,res) =>{
     try {
         const {body} = req;
@@ -13,26 +16,19 @@ exports.createUser = async (req,res) =>{
             email:body.email,
             password: encriptedPassword,
         });
-        return res.status(200).send({message: "El usuario ha sido creado"});
+        const findUser = await user.findOne({
+            where:{
+                email: body.email,
+            }
+        });
+        const findElements = await element.findAll();
+        
+        createUserElements(findUser.id,findElements);
+        return res.status(200).send({message:"Creado"});
     } catch (error) {
         return res.status(500).send(error.message);
     }
 };
 
-exports.getUsers = async (req,res) =>{
-    try {
-        const find = await user.findAll();
-        
-        const usern = []
-        for (let i = 0; i < find.length; i++) {
-            usern[i] ={
-                username: find[i].username,
-            };
-            
-        }
-        
-        return res.status(200).send(usern);
-    } catch (error) {
-        return res.status(500).send(error.message);
-    }
-};
+
+
