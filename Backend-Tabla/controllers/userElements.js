@@ -1,3 +1,4 @@
+
 const  sequelize  = require('sequelize');
 const Op  =sequelize.Op;
 
@@ -5,6 +6,7 @@ const db = require('../models/index');
 const userElement = db.userElement;
 const element = db.element;
 const elementType = db.elementType;
+const modified = db.modified;
 exports.createElement = async (req,res) =>{
     try {
         const {body} = req;
@@ -58,14 +60,24 @@ exports.getElementsPro = async (req,res) =>{
                     statusDelete:false,
                 }
             });
-            
             const elements = [];
+            let findModi;
             for (let i = 0; i < userElements.length; i++) {
-                elements[i]= await element.findByPk(userElements[i].elementId,{
-                    include:{model:elementType},
+                findModi = await modified.findOne({
+                    where:{userElementId:userElements[i].id},
+                    include:{model:elementType}
                 });
-    
+                if(!findModi){
+                    elements[i]= await element.findByPk(userElements[i].elementId,{
+                        include:{model:elementType},
+                    });
+        
+                }else{
+                    elements[i] = findModi;
+                }
+                
             }
+            
             
             const errors = {
                 1 :" No se encontró ese dato del elemento",
@@ -83,28 +95,43 @@ exports.getElementsPro = async (req,res) =>{
                 return res.status(404).send({message: errors[result]})
             }
         }
-        //127.0.0.1:3000/api/userElement?busqueda=Hidrógeno&Oxígeno&...
-        const {busqueda} = req.query;
+        //127.0.0.1:3000/api/userElement?busqueda=Hidrógeno&busqueda=Oxígeno&...
+        const {busqueda} = req.query;    
         if(busqueda){
-            const result=await obtenerVariosValores(busqueda);
+            const result=await obtenerVariosValores(busqueda,user.id);
+            return res.status(200).send(result);
         }
-        
+        console.log("a");
+
         ////127.0.0.1:3000/api/userElement
-        const elements = await userElement.findAll({
+        const findUE = await userElement.findAll({
             where:{
                 userId:user.id,
                 statusDelete:false,
             },
         });
-        console.log(elements)
+        
         const get = [];
-        for (let i = 0; i < elements.length; i++) {
-                get[i]= await element.findByPk(elements[i].elementId,{
+        let findModi;
+
+        for (let i = 0; i < findUE.length; i++) {
+                findModi = await modified.findOne({
+                    where:{userElementId:findUE[i].id,
+                          statusDelete:false},
                     include:{model:elementType},
                 });
+                
+                if(!findModi){
+                    get[i]= await element.findByPk(findUE[i].elementId,{
+                        include:{model:elementType},
+                    });
+                }else{
+                    get[i] = findModi;
+                }
+                
     
         }
-        const ordElements = await ordenNumAtomico('ASC',get)
+        const ordElements = await ordenNumAtomico('ASC',get);
         return res.status(200).send(ordElements);
 
     } catch (error) {
@@ -125,40 +152,136 @@ exports.getElementsNr = async (req,res) =>{
         
     }
 }
-async function obtenerVariosValores(busqueda){
+async function obtenerVariosValores(busqueda,idUser){
     const result=[];
-    for (let i = 0; i < busqueda.length; i++) {
-        let find = await element.findOne({
-            where:{name:busqueda[i]}
+   
+    if(typeof busqueda !== 'string'){
+        for (let i = 0; i < busqueda.length; i++) {
+            let findModi = await modified.findOne({
+                where:{name:busqueda[i],statusDelete:false},
+                include:{model:elementType}
+            });
+           
+             if(!findModi){
+                let find = await element.findOne({
+                    where:{name:busqueda[i]},
+                    include:{model:elementType},
+                });
+                
+                let find2 = await userElement.findOne({
+                    where:{statusDelete:false,
+                        elementId:find.id,
+                        userId:idUser},
+                }) 
+                if(find2){
+                    result[i] = find;
+                }else{
+                    result[i] = {message:"No es encontró " + busqueda[i] + " entre tus elementos"};
+                }
+            }else{
+                console.log(findModi.userElementId)
+                let find2 = await userElement.findOne({
+                    where:{statusDelete:false,
+                        id:findModi.userElementId,
+                        userId:idUser},
+                }) 
+                if(find2){
+                    result[i] = findModi;
+                }else{
+                    result[i] = {message:"No es encontró " + busqueda[i] + " entre tus elementos"};
+                }
+            }
+        }
+    }else{
+        let findModi = await modified.findOne({
+            where:{name:busqueda,statusDelete:false},
+            include:{model:elementType}
         });
-        let find2 = await userElement.findOne({
-            where:{statusDelete:false,
-                elementId:find.id},
-        })
-        if(find2){
-            result[i] = find2;
+       
+        if(!findModi){
+            let find = await element.findOne({
+                where:{name:busqueda},
+                include:{model:elementType},
+            });
+          
+            let find2 = await userElement.findOne({
+                where:{statusDelete:false,
+                    elementId:find.id,
+                    userId:idUser},
+            }) 
+            console.log(find2);
+            if(find2){
+                result[0] = find;
+            }else{
+                result[0] = {message:"No es encontró " + busqueda + " entre tus elementos"};
+            }
         }else{
-            result[i] = {message:"No es encontró " + busqueda[i] + " entre tus elementos"};
+            let find2 = await userElement.findOne({
+                where:{statusDelete:false,
+                    id:findModi.userElementId,
+                    userId:idUser},
+            }); 
+            if(find2){
+                result[0] = findModi;
+            }else{
+                result[0] = {message:"No es encontró " + busqueda[i] + " entre tus elementos"};
+            }
         }
     }
-    return result;
+  return result;
 }
 //127.0.0.1:3000/api/userElement/Hidrógeno
 exports.putElement = async ( req,res) =>{
     try {
         const {body,params} = req;
         if(!params.name) return res.status(404).send({message:"Se requiere name"});
-        if(!body.position) return res.status(404).send({message: "Se requiere la position a donde será cambiado el elemento"});
-        if(body.position <= 0 && body.position >= 119) return res.status(500).send("Se debe colocar un número entre el 1 al 118");
-        const find = await userElement.findOne({
-            name : params,
+        if(!body) return res.status(404).send({message: "Se requieren los atributos del elemento a cambiar"});
+        const find = await element.findOne({where:{name:params.name}});
+        if(!find) return res.status(404).send({message: "No se encontró el elemento"});
+        const findUE = await userElement.findOne({where:{
+            userId : req.user.id,
+            elementId:find.id,
+            statusDelete: false,
+            },
         });
-        const a = find.elementId;
-        find.elementId = body.position;
-        find.save();
-        const find2 = await userElement.findByPk(body.position);
-        find2.elementId = a;
-        find2.save();
+        console.log(findUE);
+
+        if(!findUE) return res.status(404).send({message:"No se encontró entre tus elementos"});
+        if(!body.name) return res.stauts(404).send({message:"Se requiere el nombre"});
+        if(!body.atomicNumber) return res.stauts(404).send({message:"Se requiere el nombre"});
+        if(!body.atomicMass) return res.stauts(404).send({message:"Se requiere el nombre"});
+        if(!body.period) return res.stauts(404).send({message:"Se requiere el nombre"});
+        if(!body.atomicSymbol) return res.stauts(404).send({message:"Se requiere el nombre"});
+        if(!body.group) return res.stauts(404).send({message:"Se requiere el nombre"});
+        if(!body.elementTypeId) return res.status(404).send({message:"Se erequiere el elementTypeId"});
+
+        const findModi = await modified.findOne({where:{userElementId:findUE.id}});
+
+        if(findModi){
+            findModi.name = body.name;
+            findModi.atomicNumber= body.atomicNumber;
+            findModi.atomicMass = body.atomicMass;
+            findModi.period = body.period;
+            findModi.atomicSymbol = body.atomicSymbol;
+            findModi.group = body.group;
+            findModi.elementTypeId = body.elementTypeId;
+            findModi.statusDelete = false;
+            findModi.save();
+        }else{
+            console.log("a");
+            const create = await modified.create({
+            name: body.name,
+            atomicSymbol:body.atomicSymbol,
+            atomicNumber: body.atomicNumber,
+            atomicMass: body.atomicMass,
+            group: body.group,
+            period: body.period,
+            elementTypeId: body.elementTypeId,
+            image: findUE.imagen,
+            userElementId: findUE.id,
+            });
+        }
+      
 
         
         return res.status(200).send({message:"Modificado"});
@@ -172,16 +295,7 @@ exports.deleteElement = async (req,res) =>{
         const {name} = req.params;
         const {user} = req.user;
         if(!name) return res.status(404).send({message: "Es necesario el nombre para eliminar"});
-        if(name === 'All'){
-            const uS = await userElement.findAll({where:{statusDelete:false,userId:user.id}});
-            for (let i = 0; i < uS.length; i++) {
-                uS[i].statusDelete =true;
-                
-            }
-            uS.save();
-            return res.status(200).send({message:"Eliminados todos los elementos"});
-  
-        }
+       
         const find = await element.findOne({
             where:{
 
@@ -197,6 +311,11 @@ exports.deleteElement = async (req,res) =>{
         });
         if(find2.statusDelete === true) return res.status(404).send({message:"No se encontró elemento."});
         find2.statusDelete = true;
+        const findModi = await modified.findOne({where:{idUserElement:find.id}});
+        if(findModi){
+            modified.statusDelete = true;
+            findModi.save();
+        }
         find2.save();
         return res.status(200).send({message:"Eliminado"});
     } catch (error) {

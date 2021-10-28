@@ -29,6 +29,15 @@ exports.createUser = async (req,res) =>{
         return res.status(500).send(error.message);
     }
 };
+async function createUserElements(userId,elements){
+    for (let i = 0; i < elements.length; i++) {
+        let create = await userElement.create({
+            elementId: elements[i].id,
+            userId: userId,
+        });
+        
+    }
+}
 
 
 

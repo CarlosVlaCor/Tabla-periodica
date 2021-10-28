@@ -8,6 +8,8 @@ const type = require('../controllers/elementTypes');
 const middleware = require("../middleware/authorization");
 const elements = require('../controllers/elements');
 const userElement = require('../controllers/userElements');
+const modified = require('../controllers/modified');
+const atributes = require('../controllers/atributes');
 //rutas para users
 router.route('/users').post(users.createUser);
 //rutas para generalities
@@ -24,5 +26,8 @@ router.route("/login").post(generalities.login);
 router.route("/userElement").post(middleware.verifyToken,userElement.createElement).get(middleware.verifyToken,userElement.getElementsPro);
 router.route("/userElement/:name").put(middleware.verifyToken,userElement.putElement).delete(middleware.verifyToken,userElement.deleteElement);
 router.route("/userElementNr").get(userElement.getElementsNr);
+
+//rutas para modified
+
 module.exports = router;
 
